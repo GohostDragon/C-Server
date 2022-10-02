@@ -4,60 +4,48 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <Windows.h>
 
-class SpinLock
-{
-public:
-    void lock()
-    {
-        // CAS (Compare-And-Swap)
-        bool expected = false;
-        bool desired = true;
-
-        while(_locked.compare_exchange_strong(expected, desired) == false)
-        {
-            expected = false;
-        }
-    }
-
-    void unlock()
-    {
-        _locked.store(false);
-    }
-
-private:
-    atomic<bool> _locked = false;
-};
-
-int32 sum = 0;
-mutex m;
-SpinLock spinLock;
-
-void Add()
-{
-    for (int32 i = 0; i < 10'0000; i++)
-    {
-        lock_guard<SpinLock> guard(spinLock);
-        sum++;
-    }
-}
-
-void Sub()
-{
-    for (int32 i = 0; i < 10'0000; i++)
-    {
-        lock_guard<SpinLock> guard(spinLock);
-        sum--;
-    }
-}
+atomic<bool> flag;
 
 int main()
 {
-    thread t1(Add);
-    thread t2(Sub);
+    flag = false;
 
-    t1.join();
-    t2.join();
+    // flag = true
+    flag.store(true);
 
-    cout << sum << endl;
+    //bool val = flag
+    bool val = flag.load();
+
+    // 이전 flag 값을 prev에 넣고 flag 값을 수정
+    {
+        bool prev = flag.exchange(true);
+        //bool prev =flag;
+        //flag = true;
+    }
+
+    // CAS (Compare-And_Swap) 조건부 수정
+    {
+        bool expected = false;
+        bool desired = true;
+        flag.compare_exchange_strong(expected, desired);
+        /*
+        if (flag == expected)
+        {
+            flag = desired;
+            return true;
+        }
+        else
+        {
+            expected = flag;
+            return false;
+        }
+        */
+
+        bool expected = false;
+        bool desired = true;
+        // strong이랑 기본적으로 똑같지만 중간에 다른 스레드의 인터럽트를 받아서 중간에 실패할 수 있음
+        flag.compare_exchange_weak(expected, desired);
+    }
 }
