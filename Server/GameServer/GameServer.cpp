@@ -5,32 +5,24 @@
 #include <atomic>
 #include <mutex>
 #include <Windows.h>
+#include "ThreadManager.h"
 
-thread_local int32 LThread = 0;
+CoreGlobal Core;
 
-void ThreadMain(int32 threadid)
+void ThreadMain()
 {
-    LThread = threadid;
-
-    while (true)
-    {
-        cout << "Hi I am Thread " << LThread << endl;
-        this_thread::sleep_for(1s);
-    }
+	while (true)
+	{
+		cout << "Hello Iam thrad.. " << LThreadId << endl;
+		this_thread::sleep_for(1s);
+	}
 }
 
 int main()
 {
-    vector<thread> threads;
-
-    for (int32 i = 0; i < 10; i++)
-    {
-        int32 threadId = i + 1;
-        threads.push_back(thread(ThreadMain, threadId));
-    }
-
-    for (thread& t : threads)
-    {
-        t.join();
-    }
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch(ThreadMain);
+	}
+	GThreadManager->Join();
 }
