@@ -27,9 +27,6 @@ public:
 
 int main()
 {
-	Knight* knight = (Knight*)xnew<Player>();
-
-	knight->_hp = 100;
-
-	xdelete(knight);
+	Vector<int32> v;
+	string
 }
