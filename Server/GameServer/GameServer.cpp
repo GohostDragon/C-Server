@@ -6,6 +6,7 @@
 #include <mutex>
 #include <Windows.h>
 #include "ThreadManager.h"
+#include "Memory.h"
 
 int main()
 {
