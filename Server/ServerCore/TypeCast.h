@@ -182,7 +182,31 @@ To TypeCast(From* ptr)
 }
 
 template<typename To, typename From>
+shared_ptr<To> TypeCast(shared_ptr<From> ptr)
+{
+	if (ptr == nullptr)
+		return nullptr;
+
+	using TL = typename From::TL;
+
+	if (TypeConversion<TL>::CanConvert(ptr->_typeId, IndexOf<TL, remove_pointer_t<To>>::value))
+		return static_pointer_cast<To>(ptr);
+
+	return nullptr;
+}
+
+template<typename To, typename From>
 bool CanCast(From* ptr)
+{
+	if (ptr == nullptr)
+		return false;
+
+	using TL = typename From::TL;
+	return TypeConversion<TL>::CanConvert(ptr->_typeId, IndexOf<TL, remove_pointer_t<To>>::value);
+}
+
+template<typename To, typename From>
+bool CanCast(shared_ptr<From> ptr)
 {
 	if (ptr == nullptr)
 		return false;
