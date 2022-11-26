@@ -12,6 +12,8 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
+#include "Memory.h"
+
 void HandleError(const char* cause)
 {
 	int32 errCode = ::WSAGetLastError();
@@ -130,7 +132,7 @@ int main()
 		if (clientSocket == INVALID_SOCKET)
 			return 0;
 
-		Session* session = new Session();
+		Session* session = xnew<Session>();
 		session->socket = clientSocket;
 		sessionManager.push_back(session);
 
@@ -146,10 +148,15 @@ int main()
 		OverlappedEx* overlappedEx = new OverlappedEx();
 		overlappedEx->type = IO_TYPE::READ;
 
+		// ADD_REF
 		DWORD recvLen = 0;
 		DWORD flags = 0;
 		::WSARecv(clientSocket, &wsaBuf, 1, &recvLen, &flags, &overlappedEx->overlapped, NULL);
 
+		// 유저가 게임 접속 종료
+		Session* s = sessionManager.back();
+		sessionManager.pop_back();
+		xdelete(s);
 		//::closesocket(session.socket);
 		//::WSACloseEvent(wsaEvent);
 	}
